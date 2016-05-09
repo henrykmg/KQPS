@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <!--<link href="css/bootstrap.css" rel="stylesheet" />-->
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/jquery-ui.css" rel="stylesheet" />
+
+
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script>
+        var json;
+        function showhide() {
+            $('#form_container').slideToggle(500, 'swing');
+        }
+
+
+        $(document).ready(function () {
+
+            $('#form_container').hide();
+
+            var cc = 0;
+            var s = 0;
+
+
+            var js = $.ajax({
+                url: 'fetchdata.php',
+                type: 'post',
+                // data: {'id':jQuery('select[name=id]').val()},
+                success: function (data) {
+                   }
+            });
+
+            json = (function () {
+                var json = null;
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'url': "data.json",
+                    'dataType': "json",
+                    'success': function (data) {
+                        json = data;
+
+                    }
+                });
+                return json;
+            })();
+
+                $('.add_event').click(function () {
+                $('#form_container').slideToggle(500, 'swing');
+            });
+
+
+
+
+
+            $.datepicker.setDefaults({
+                inline: true,
+                monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                //currentText: "Now",
+                //defaultDate: +7,
+                dateFormat: "yy-mm-dd",
+                showButtonPanel: true,
+                onSelect: function (date, dp) {
+                    updateDatePickerCells();
+                },
+                onChangeMonthYear: function (month, year, dp) {
+                    $('#event_details').empty();
+                    $('#form_container').hide();
+                    updateDatePickerCells();
+                },
+                beforeShow: function (elem, dp) { 
+                    updateDatePickerCells();
+                }
+            });
+            updateDatePickerCells();
+            $('#datepicker').datepicker({
+
+
+            });
+
+
+            var dynamicCSSRules = [];
+            function addCSSRule(rule) {
+                if ($.inArray(rule, dynamicCSSRules) == -1) {
+                    $('head').append('<style>' + rule + '</style>');
+                    dynamicCSSRules.push(rule);
+                }
+            }
+
+
+            function updateDatePickerCells(dp) {
+                setTimeout(function () {
+                    var cellContents = json;
+                    var m = [];
+                    m = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                    var keys = Object.keys(cellContents);
+                    result = [];
+                    for (var i = 0, len = cellContents.length; i < len; i++) {
+                        result.push(cellContents[keys[i]]);
+                    }
+
+                    for (var r = 0; r < result.length; r++) {
+                        var d = new Date(result[r].EventDate.substring(0, 4), result[r].EventDate.substring(5, 7), result[r].EventDate.substring(8, 10));
+                        var className = 'datepicker-content-' + r;
+                        for (var xx = 1; xx < $('.ui-datepicker tr').length; xx++) {
+                            $('.ui-datepicker tr:nth-child(' + xx + ') td').each(function (idx, elem) {
+                                if ($(this).text() == d.getDate() && $('.ui-datepicker-month').text() == m[d.getMonth() - 1]) {
+                                    $(this).html("<a class='" + className + "'> " + $(this).text() + " </a>");//.append("<h1>" + result[ct] + "</h1>");
+                                    $('#event_details').append("" + "<div class='row'><div class='col-lg-2 col-md-4 col-sm-4 col-xs-4'><div style='background-color:#056180;color:wheat;height:80px;width:80%; margin-top:20px'><h1 style='margin-top:10px;text-align:center;'>" + d.getDate() + "</h1><h3 style='text-align:center;font-size:17px;margin-top:-10px;text-transform:uppercase;'>" + $('.ui-datepicker-month').text() + "</h3></div></div><div class='col-lg-10 col-md-8 col-sm-8 col-xs-8'><div style='background-color: white; height: auto;padding-bottom:15px;padding-left:5%;padding-right:5%; width:100%; margin-top: 10px;min-height:200px;'><h3 style='color:blue;padding:15px 10px 5px 10px;font-family:trebuchet ms;font-size:14px;' >" + result[r].Event + "</h3><p style='padding:5px 10px 5px 10px;font-family:trebuchet ms;font-size:11px;'><p style='width:80%;float:right;'>" + result[r].Details + "</p><img class='img" + r + "' src='" + result[r].Photos + "' style='float:left;margin-right:20px;margin-left:20px;width:10%'/></p></div></div></div>");
+                                    $(".img" + r).error(function () {
+                                        $('.img' + r).hide();
+                                    });
+                                    if ($(".img" + r).attr('src') == "") {
+                                        $('.img' + r).hide();
+                                    }
+                                }
+
+                            });
+
+                        }
+                    }
+                  
+                }, 0);
+            }
+        });
+    </script>
+    <style>
+        .ui-datepicker td a:after {
+            content: "";
+            display: block;
+            text-align: center;
+            color: red;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .ui-datepicker td a:hover {
+            width: auto;
+            height: auto;
+            min-height: 100px;
+            min-width: 100px;
+            margin-top: -50px;
+            position: absolute;
+            background-color: #056180;
+            color: white;
+            z-index: 1000;
+        }
+
+            .ui-datepicker td a:hover h3 {
+                visibility: visible;
+            }
+
+        .ui-datepicker td a {
+            width: 34px !important;
+            height: 34px;
+            color: wheat;
+            background-color: rgb(174, 11, 11);
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+            font-family: 'Gill Sans MT';
+            /*margin-top: 10px;*/
+        }
+
+            .ui-datepicker td a h3 {
+                visibility: hidden;
+            }
+
+        .ui-datepicker {
+            /*width: 500px;
+            text-align:center;*/
+            /*background-image:url('bg.jpg');*/
+            background-color: rgba(100,61,80,0.3);
+            width: 100%;
+        }
+
+        #datepicker {
+            /*float:left;*/
+            position: relative;
+        }
+
+        .detail {
+            /*width:500px;*/
+            min-height: 200px;
+            background-color: #ffd800;
+            /*float:right;*/
+        }
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <div class="row" style="margin-top:100px;">
+            <div id="tbl"></div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-12" style="background-color:#ffd800;">
+                <div id="datepicker" style="margin-top:17px;padding-bottom:17px;">
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-md-7 col-sm-7 col-xs-12" id="event_details" style="background-color:#ffd800;min-height:340px;height:auto;padding-bottom:10px;">
+
+                <!-- Events being generated dynamically, follow the commmented code to format.. -->
+                <!--<div class="row">
+                                    <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                                        <div style="background-color:#056180;height:100px;width:100%; margin-top:10px">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-10 col-md-8 col-sm-8 col-xs-8">
+                                        <div style="background-color: white; height: 100px; width: 100%; margin-top: 10px">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                                        <div style="background-color:#056180;height:100px;width:100%; margin-top:10px">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-10 col-md-8 col-sm-8 col-xs-8">
+                                        <div style="background-color: white; height: 100px; width: 100%; margin-top: 10px">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                    <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                        <div style="background-color:#056180;height:100px;width:100%; margin-top:10px">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-10 col-md-8 col-sm-8 col-xs-8">
+                        <div style="background-color: white; height: 100px; width: 100%; margin-top: 10px">
+                        </div>
+                    </div>
+
+                </div>-->
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
